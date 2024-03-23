@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './Home.dart';
+import './custom_widgets/modals/Error_Modal.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,9 +16,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(
+                builder: (_) => MyHomePage(title: 'Flutter Demo Home Page'));
+          case '/error':
+            final errorMessage = settings.arguments as String;
+            return MaterialPageRoute(
+                builder: (_) => ErrorModal(errorMessage: errorMessage));
+          default:
+            return null;
+        }
+      },
+      initialRoute: '/',
     );
   }
 }
-
-
