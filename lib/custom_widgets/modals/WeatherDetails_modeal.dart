@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WeatherDetailsModal extends StatefulWidget {
-  const WeatherDetailsModal({Key? key, required this.weatherData})
-      : super(key: key);
+  const WeatherDetailsModal({super.key, required this.weatherData});
 
   final Map<String, dynamic> weatherData;
 
@@ -14,7 +13,7 @@ class _WeatherDetailsModalState extends State<WeatherDetailsModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
+      child: const Column(
         children: [
           Text('Weather Details'),
         ],

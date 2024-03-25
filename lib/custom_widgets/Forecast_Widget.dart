@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ForecastWidget extends StatefulWidget {
-  const ForecastWidget({Key? key, required this.foreCastDataJson})
-      : super(key: key);
+  const ForecastWidget({super.key, required this.foreCastDataJson});
   final Map<dynamic, dynamic> foreCastDataJson;
 
   @override
@@ -21,14 +20,14 @@ class _ForecastWidgetState extends State<ForecastWidget> {
       ),
       child: ListView(
         shrinkWrap: true,
-        physics: ScrollPhysics(),
+        physics: const ScrollPhysics(),
         children: widget.foreCastDataJson['forecast']["forecastday"]
             .map<Widget>((day) {
           return Column(
             children: [
               Text(
                 day['date'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber,
@@ -44,7 +43,7 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                       ),
                       Text(
                         day['day']['condition']['text'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Colors.amber,
                         ),
@@ -54,15 +53,15 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                   Column(
                     children: [
                       Text(
-                        day['day']['maxtemp_c'].toString() + '°C',
-                        style: TextStyle(
+                        '${day['day']['maxtemp_c']}°C',
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Colors.amber,
                         ),
                       ),
                       Text(
-                        day['day']['mintemp_c'].toString() + '°C',
-                        style: TextStyle(
+                        '${day['day']['mintemp_c']}°C',
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Colors.amber,
                         ),
@@ -73,16 +72,14 @@ class _ForecastWidgetState extends State<ForecastWidget> {
                     children: [
                       Text(
                         day['day']['condition']['text'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Colors.amber,
                         ),
                       ),
                       Text(
-                        'Wind: ' +
-                            day['day']['maxwind_kph'].toString() +
-                            ' km/h',
-                        style: TextStyle(
+                        'Wind: ${day['day']['maxwind_kph']} km/h',
+                        style: const TextStyle(
                           fontSize: 15,
                           color: Colors.amber,
                         ),

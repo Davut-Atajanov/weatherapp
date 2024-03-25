@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import './custom_widgets/modals/Error_Modal.dart';
-import 'custom_widgets/Weather_Widget.dart';
+import 'custom_widgets/weather_widget.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'custom_widgets/Forecast_Widget.dart';

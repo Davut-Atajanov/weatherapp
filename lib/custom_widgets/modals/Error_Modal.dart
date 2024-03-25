@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ErrorModal extends StatefulWidget {
-  const ErrorModal({Key? key, required this.errorMessage}) : super(key: key);
+  const ErrorModal({super.key, required this.errorMessage});
 
   final String errorMessage;
 
@@ -14,14 +14,14 @@ class _ErrorModalState extends State<ErrorModal> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ModalBarrier(
+        const ModalBarrier(
           color: Colors.white,
           dismissible: false,
         ),
         Center(
           child: Container(
-            padding: EdgeInsets.all(20.0),
-            margin: EdgeInsets.symmetric(horizontal: 40.0),
+            padding: const EdgeInsets.all(20.0),
+            margin: const EdgeInsets.symmetric(horizontal: 40.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10.0),
@@ -30,21 +30,21 @@ class _ErrorModalState extends State<ErrorModal> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Error',
                   style: TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10.0),
+                const SizedBox(height: 10.0),
                 Text(
                   widget.errorMessage,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                   ),
                 ),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
               ],
             ),
           ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WeatherWidget extends StatefulWidget {
-  const WeatherWidget({Key? key, required this.locationDataJson})
-      : super(key: key);
+  const WeatherWidget({super.key, required this.locationDataJson});
   final Map<dynamic, dynamic> locationDataJson;
 
   @override
@@ -29,7 +28,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
               ),
               Text(
                 widget.locationDataJson['current']['condition']['text'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   color: Colors.amber,
                 ),
@@ -42,15 +41,15 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                 widget.locationDataJson['location']['region'] +
                     ', ' +
                     widget.locationDataJson['location']['country'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber,
                 ),
               ),
               Text(
-                widget.locationDataJson['current']['temp_c'].toString() + '°C',
-                style: TextStyle(
+                '${widget.locationDataJson['current']['temp_c']}°C',
+                style: const TextStyle(
                   fontSize: 15,
                   color: Colors.amber,
                 ),
@@ -61,16 +60,14 @@ class _WeatherWidgetState extends State<WeatherWidget> {
             children: [
               Text(
                 widget.locationDataJson['current']['condition']['text'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 15,
                   color: Colors.amber,
                 ),
               ),
               Text(
-                'Wind: ' +
-                    widget.locationDataJson['current']['wind_kph'].toString() +
-                    ' km/h',
-                style: TextStyle(
+                'Wind: ${widget.locationDataJson['current']['wind_kph']} km/h',
+                style: const TextStyle(
                   fontSize: 15,
                   color: Colors.amber,
                 ),
