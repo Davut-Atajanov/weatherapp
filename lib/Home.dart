@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
+import 'package:weatherapp/select_city.dart';
 import './custom_widgets/modals/Error_Modal.dart';
 import 'custom_widgets/weather_widget.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +10,7 @@ import 'custom_widgets/Forecast_Widget.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
   final String apiKey = 'ecfc87ba86934be4a2201227242303';
 
@@ -49,10 +52,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return false;
   }
 
-  void _fetchWeatherData() async {
-    final response = await http.get(Uri.parse(
-      'http://api.weatherapi.com/v1/current.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}',
-    ));
+  void _fetchWeatherData(String? lat, String? lng) async {
+    final Response response;
+    if(lat == null && lng == null){
+      response = await http.get(Uri.parse(
+        'http://api.weatherapi.com/v1/current.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}',
+      ));
+    }else{
+      response = await http.get(Uri.parse(
+        'http://api.weatherapi.com/v1/current.json?key=${widget.apiKey}&q=$lat,$lng',
+      ));
+    }
     print('Response status code: ${response.statusCode}');
     if (response.statusCode == 200) {
       setState(() {
@@ -65,10 +75,18 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _fetchForeCastData() async {
-    final response = await http.get(Uri.parse(
-      'http://api.weatherapi.com/v1/forecast.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}&days=3',
-    ));
+  void _fetchForeCastData(String? lat, String? lng) async {
+    final Response response;
+    if(lat == null && lng == null){
+      response = await http.get(Uri.parse(
+        'http://api.weatherapi.com/v1/forecast.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}&days=3',
+      ));
+    }else{
+      response = await http.get(Uri.parse(
+        'http://api.weatherapi.com/v1/forecast.json?key=${widget.apiKey}&q=$lat,$lng}&days=3',
+      ));
+    }
+
     print('Response status code: ${response.statusCode}');
     if (response.statusCode == 200) {
       var foreCastData = jsonDecode(response.body);
@@ -84,17 +102,30 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void changeLocation() async {
+  // void changeLocation() async {
+  //   setState(() {
+  //     currentLocation = {
+  //       'latitude': 56.1304,
+  //       'longitude': -106.3468,
+  //     };
+  //   });
+  //   _fetchWeatherData();
+  //   _fetchForeCastData();
+  // }
+
+  void selectCurrentLocation() async{
+    final position = await Geolocator.getCurrentPosition();
     setState(() {
       currentLocation = {
-        'latitude': 56.1304,
-        'longitude': -106.3468,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
       };
     });
-    _fetchWeatherData();
-    _fetchForeCastData();
+    _fetchWeatherData(null, null);
+    _fetchForeCastData(null, null);
   }
 
+  @override
   void initState() {
     super.initState();
     _initializeData();
@@ -103,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _initializeData() async {
     await _requestPermission();
     if (permissionStatus == 'availed') {
-      _fetchWeatherData();
-      _fetchForeCastData();
+      _fetchWeatherData(null, null);
+      _fetchForeCastData(null, null);
     }
   }
 
@@ -116,14 +147,19 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: 70,
                   alignment: Alignment.topCenter,
-                  padding: EdgeInsets.all(20),
-                  child: Text(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    border: BorderDirectional(
+                      bottom: BorderSide(color: Colors.amber, width: 2),
+                    ),
+                  ),
+                  child: const Text(
                     "Weather Guru",
                     style: TextStyle(
                       fontSize: 20,
@@ -131,39 +167,73 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.amber,
                     ),
                   ),
-                  decoration: BoxDecoration(
-                    border: BorderDirectional(
-                      bottom: BorderSide(color: Colors.amber, width: 2),
-                    ),
-                  ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 if (locationDataJson.isNotEmpty)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Current Weather",
+                        const Text("Current Weather",
                             style:
                                 TextStyle(color: Colors.amber, fontSize: 30)),
                         WeatherWidget(locationDataJson: locationDataJson),
                       ]),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 if (foreCastDataJson.isNotEmpty)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Forecast",
+                        const Text("Forecast",
                             style:
                                 TextStyle(color: Colors.amber, fontSize: 30)),
                         ForecastWidget(foreCastDataJson: foreCastDataJson),
                       ]),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: changeLocation,
-                  child: Text('Change Location'),
-                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SelectCity()),
+                        ).then((result) {
+                          // This block will be executed when SelectCity is popped and a result is returned
+                          if (result != null) {
+                            Map<String, dynamic> coordinates = result as Map<String, dynamic>;
+                            String lat = coordinates["lat"] ?? "";
+                            String lng = coordinates["lng"] ?? "";
+                            // Do something with the lat and lng values
+                            setState(() {
+                              _fetchWeatherData(lat, lng);
+                              _fetchForeCastData(lat, lng);
+                            });
+                          }
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black.withOpacity(0.5)),
+                      child: const Text(
+                        'Change Location',
+                        style: TextStyle(color: Colors.amber),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    ElevatedButton(
+                      onPressed: selectCurrentLocation,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black.withOpacity(0.5)),
+                      child: const Text(
+                        'Current Location',
+                        style: TextStyle(color: Colors.amber),
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
@@ -175,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: MediaQuery.of(context).size.height,
                 color: Colors.black.withOpacity(0.5),
                 alignment: Alignment.center,
-                child: ErrorModal(errorMessage: 'An error occurred'),
+                child: const ErrorModal(errorMessage: 'An error occurred'),
               ),
             ),
         ],
