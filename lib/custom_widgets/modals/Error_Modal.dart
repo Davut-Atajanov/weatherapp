@@ -45,6 +45,12 @@ class _ErrorModalState extends State<ErrorModal> {
                   ),
                 ),
                 const SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Close'),
+                ),
               ],
             ),
           ),
