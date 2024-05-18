@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weatherapp/data_access/weather_conditions.dart';
 
 class ForecastWidget extends StatefulWidget {
   const ForecastWidget({super.key, required this.foreCastDataJson});
@@ -12,86 +13,96 @@ class _ForecastWidgetState extends State<ForecastWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment.center,
-      width: MediaQuery.of(context).size.width * 0.9,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.black.withOpacity(0.5),
-      ),
-      child: ListView(
-        shrinkWrap: true,
-        physics: const ScrollPhysics(),
-        children: widget.foreCastDataJson['forecast']["forecastday"]
-            .map<Widget>((day) {
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height * 0.8,
+      child: PageView.builder(
+        itemCount: widget.foreCastDataJson['forecast']['forecastday'].length,
+        itemBuilder: (context, index) {
+          var forecastData =
+              widget.foreCastDataJson['forecast']['forecastday'][index];
+          var date = forecastData['date'];
+          var dayConditionCode = forecastData['day']['condition']['code'];
+          var dayTemp = forecastData['day']['avgtemp_c'];
+          var conditionText = forecastData['day']['condition']['text'];
+
           return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                day['date'],
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.amber,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    children: [
-                      Image.network(
-                        day['day']['condition']['icon'],
-                      ),
-                      Text(
-                        day['day']['condition']['text'],
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    "Forecast",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 18, 18, 18),
+                      letterSpacing: 2,
+                    ),
                   ),
-                  Column(
-                    children: [
-                      Text(
-                        '${day['day']['maxtemp_c']}°C',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.amber,
-                        ),
-                      ),
-                      Text(
-                        '${day['day']['mintemp_c']}°C',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 125, 125, 125),
+                      letterSpacing: 2,
+                    ),
                   ),
-                  Column(
-                    children: [
-                      Text(
-                        day['day']['condition']['text'],
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.amber,
-                        ),
-                      ),
-                      Text(
-                        'Wind: ${day['day']['maxwind_kph']} km/h',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ],
-                  )
+                  // Assuming location data is the same for all forecast days
+                  Text(
+                    widget.foreCastDataJson['location']['region'],
+                    style: const TextStyle(
+                        fontSize: 50,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 4, 4, 12)),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.zero,
+                    child: Image.asset(
+                      getWeatherImageUrl(dayConditionCode),
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
+                  Text(
+                    '$dayTemp°C',
+                    style: const TextStyle(
+                      fontSize: 50,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 4, 4, 12),
+                    ),
+                  ),
+                  Text(
+                    conditionText,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 123, 122, 121),
+                    ),
+                  ),
                 ],
               ),
             ],
           );
-        }).toList(),
+        },
       ),
     );
+  }
+
+  String getWeatherImageUrl(int code) {
+    for (var category in weatherCategories) {
+      if (category['codes'].contains(code)) {
+        return category['image_url'];
+      }
+    }
+    return 'assets/images/default.png';
   }
 }

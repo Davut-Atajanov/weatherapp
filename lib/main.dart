@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:weatherapp/context_provider/navigation_provider.dart';
 import 'package:weatherapp/select_city.dart';
 import './Home.dart';
 import './custom_widgets/modals/Error_Modal.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => NavigationProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,14 +28,14 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(
-                builder: (_) => const MyHomePage(title: 'Flutter Demo Home Page'));
+                builder: (_) =>
+                    const MyHomePage(title: 'Flutter Demo Home Page'));
           case '/error':
             final errorMessage = settings.arguments as String;
             return MaterialPageRoute(
                 builder: (_) => ErrorModal(errorMessage: errorMessage));
           case '/select-city':
-            return MaterialPageRoute(builder:
-            (_) => const SelectCity());
+            return MaterialPageRoute(builder: (_) => const SelectCity());
           default:
             return null;
         }

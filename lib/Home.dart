@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
+import 'package:provider/provider.dart';
+import 'package:weatherapp/context_provider/navigation_provider.dart';
+import 'package:weatherapp/custom_widgets/Bottom_Navbar.dart';
 import 'package:weatherapp/select_city.dart';
 import './custom_widgets/modals/Error_Modal.dart';
 import 'custom_widgets/weather_widget.dart';
@@ -23,6 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var permissionStatus = '';
   var locationDataJson = {};
   var foreCastDataJson = {};
+  var currentPositon = 0;
 
   Future<bool> _requestPermission() async {
     final permission = await Geolocator.requestPermission();
@@ -53,12 +58,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _fetchWeatherData(String? lat, String? lng) async {
+    setState(() {
+      locationDataJson = {};
+    });
     final Response response;
-    if(lat == null && lng == null){
+    if (lat == null && lng == null) {
       response = await http.get(Uri.parse(
         'http://api.weatherapi.com/v1/current.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}',
       ));
-    }else{
+    } else {
       response = await http.get(Uri.parse(
         'http://api.weatherapi.com/v1/current.json?key=${widget.apiKey}&q=$lat,$lng',
       ));
@@ -76,12 +84,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _fetchForeCastData(String? lat, String? lng) async {
+    setState(() {
+      foreCastDataJson = {};
+    });
     final Response response;
-    if(lat == null && lng == null){
+    if (lat == null && lng == null) {
       response = await http.get(Uri.parse(
         'http://api.weatherapi.com/v1/forecast.json?key=${widget.apiKey}&q=${currentLocation['latitude']},${currentLocation['longitude']}&days=3',
       ));
-    }else{
+    } else {
       response = await http.get(Uri.parse(
         'http://api.weatherapi.com/v1/forecast.json?key=${widget.apiKey}&q=$lat,$lng}&days=3',
       ));
@@ -113,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //   _fetchForeCastData();
   // }
 
-  void selectCurrentLocation() async{
+  void selectCurrentLocation() async {
     final position = await Geolocator.getCurrentPosition();
     setState(() {
       currentLocation = {
@@ -141,99 +152,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final navigationProvider = Provider.of<NavigationProvider>(context);
+    var currentIndex = navigationProvider.currentIndex;
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.9),
+      bottomNavigationBar: BottomNav(),
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       body: Stack(
         children: [
           Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: locationDataJson.isEmpty
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 70,
-                  alignment: Alignment.topCenter,
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    border: BorderDirectional(
-                      bottom: BorderSide(color: Colors.amber, width: 2),
-                    ),
-                  ),
-                  child: const Text(
-                    "Weather Guru",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.amber,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (locationDataJson.isNotEmpty)
+                if (locationDataJson.isEmpty) const CircularProgressIndicator(),
+                if (locationDataJson.isNotEmpty && currentIndex == 0)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Current Weather",
-                            style:
-                                TextStyle(color: Colors.amber, fontSize: 30)),
                         WeatherWidget(locationDataJson: locationDataJson),
                       ]),
-                const SizedBox(height: 20),
-                if (foreCastDataJson.isNotEmpty)
+                if (foreCastDataJson.isNotEmpty && currentIndex == 1)
                   Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Forecast",
-                            style:
-                                TextStyle(color: Colors.amber, fontSize: 30)),
                         ForecastWidget(foreCastDataJson: foreCastDataJson),
                       ]),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: (){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SelectCity()),
-                        ).then((result) {
-                          // This block will be executed when SelectCity is popped and a result is returned
-                          if (result != null) {
-                            Map<String, dynamic> coordinates = result as Map<String, dynamic>;
-                            String lat = coordinates["lat"] ?? "";
-                            String lng = coordinates["lng"] ?? "";
-                            // Do something with the lat and lng values
-                            setState(() {
-                              _fetchWeatherData(lat, lng);
-                              _fetchForeCastData(lat, lng);
-                            });
-                          }
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black.withOpacity(0.5)),
-                      child: const Text(
-                        'Change Location',
-                        style: TextStyle(color: Colors.amber),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 50,
-                    ),
-                    ElevatedButton(
-                      onPressed: selectCurrentLocation,
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black.withOpacity(0.5)),
-                      child: const Text(
-                        'Current Location',
-                        style: TextStyle(color: Colors.amber),
-                      ),
-                    ),
-                  ],
-                )
               ],
             ),
           ),
@@ -248,6 +194,56 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const ErrorModal(errorMessage: 'An error occurred'),
               ),
             ),
+          Positioned(
+              top: 30,
+              right: 0,
+              child: Container(
+                  width: 100,
+                  height: 110,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const SelectCity()),
+                              ).then((result) {
+                                if (result != null) {
+                                  Map<String, dynamic> coordinates =
+                                      result as Map<String, dynamic>;
+                                  String lat = coordinates["lat"] ?? "";
+                                  String lng = coordinates["lng"] ?? "";
+                                  setState(() {
+                                    _fetchWeatherData(lat, lng);
+                                    _fetchForeCastData(lat, lng);
+                                  });
+                                }
+                              });
+                            },
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.amber,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          ElevatedButton(
+                            onPressed: selectCurrentLocation,
+                            child: const Icon(
+                              Icons.my_location,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )))
         ],
       ),
     );
