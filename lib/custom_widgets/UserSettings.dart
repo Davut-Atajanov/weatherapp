@@ -17,11 +17,17 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   late User currentUser;
+  bool _visible = false;
 
   @override
   void initState() {
     super.initState();
     currentUser = widget.user;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _visible = true;
+      });
+    });
   }
 
   Future<void> _changeImage() async {
@@ -51,53 +57,60 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 50),
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 60,
-            backgroundImage: currentUser.imageAsset != ''
-                ? FileImage(File(currentUser.imageAsset!))
-                : AssetImage('assets/images/avatar.jpg') as ImageProvider,
-          ),
-          SizedBox(height: 16),
-          Text(
-            currentUser.name ?? 'Name not provided',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            currentUser.email ?? 'Email not provided',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          SizedBox(height: 16),
-          UserInfoTile(
-              icon: Icons.phone,
-              info: currentUser.phone ?? 'Phone not provided'),
-          UserInfoTile(
-              icon: Icons.location_on,
-              info: currentUser.address ?? 'Address not provided'),
-          UserInfoTile(
-              icon: Icons.location_city,
-              info: currentUser.city ?? 'no city provided'),
-          UserInfoTile(
-              icon: Icons.location_city,
-              info: currentUser.state ?? 'no state provided'),
-          SizedBox(height: 24),
-          ElevatedButton.icon(
-            icon: Icon(Icons.edit),
-            label: Text('Update Profile'),
-            onPressed: () {},
-          ),
-          SizedBox(height: 8),
-          ElevatedButton.icon(
-            icon: Icon(Icons.image),
-            label: Text('Change Image'),
-            onPressed: _changeImage,
-          ),
-        ],
+    return AnimatedOpacity(
+      opacity: _visible ? 1 : 0,
+      duration: Duration(milliseconds: 2000),
+      child: Container(
+        padding: EdgeInsets.only(top: 50),
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Column(
+          children: [
+            GestureDetector(
+              onLongPress: _changeImage,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: currentUser.imageAsset != ''
+                    ? FileImage(File(currentUser.imageAsset!))
+                    : AssetImage('assets/images/avatar.jpg') as ImageProvider,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              currentUser.name ?? 'Name not provided',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              currentUser.email ?? 'Email not provided',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            SizedBox(height: 16),
+            UserInfoTile(
+                icon: Icons.phone,
+                info: currentUser.phone ?? 'Phone not provided'),
+            UserInfoTile(
+                icon: Icons.location_on,
+                info: currentUser.address ?? 'Address not provided'),
+            UserInfoTile(
+                icon: Icons.location_city,
+                info: currentUser.city ?? 'no city provided'),
+            UserInfoTile(
+                icon: Icons.location_city,
+                info: currentUser.state ?? 'no state provided'),
+            SizedBox(height: 24),
+            ElevatedButton.icon(
+              icon: Icon(Icons.edit),
+              label: Text('Update Profile'),
+              onPressed: () {},
+            ),
+            SizedBox(height: 8),
+            ElevatedButton.icon(
+              icon: Icon(Icons.image),
+              label: Text('Change Image'),
+              onPressed: _changeImage,
+            ),
+          ],
+        ),
       ),
     );
   }
