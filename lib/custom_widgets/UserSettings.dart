@@ -4,30 +4,42 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
+import 'package:weatherapp/auth/screens/Register.dart';
 import 'package:weatherapp/models/User.dart';
+import 'package:weatherapp/models/db_user.dart';
+
+import '../db/database_helper.dart';
 
 class UserProfilePage extends StatefulWidget {
-  final User user;
-
-  UserProfilePage({required this.user});
+  const UserProfilePage();
 
   @override
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  late User currentUser;
+  DBUser? currentUser;
   bool _visible = false;
+  String? imageLocation;
 
   @override
   void initState() {
     super.initState();
-    currentUser = widget.user;
+    _fetchUser();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _visible = true;
       });
     });
+  }
+
+  Future<void> _fetchUser() async {
+    final users = await DatabaseHelper().users();
+    if (users.isNotEmpty) {
+      setState(() {
+        currentUser = users.first; // Assuming there is only one user
+      });
+    }
   }
 
   Future<void> _changeImage() async {
@@ -37,7 +49,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (image != null) {
       final Directory appDir = await getApplicationDocumentsDirectory();
       final String fileName =
-          '${currentUser.name}${path.extension(image.path)}';
+          '${currentUser?.fullname}${path.extension(image.path)}';
       final String savedImagePath =
           path.join(appDir.path, 'assets/images', fileName);
 
@@ -50,7 +62,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       final File newImage = await File(image.path).copy(savedImagePath);
 
       setState(() {
-        currentUser.imageAsset = newImage.path;
+        imageLocation = newImage.path;
       });
     }
   }
@@ -69,39 +81,49 @@ class _UserProfilePageState extends State<UserProfilePage> {
               onLongPress: _changeImage,
               child: CircleAvatar(
                 radius: 60,
-                backgroundImage: currentUser.imageAsset != ''
-                    ? FileImage(File(currentUser.imageAsset!))
+                backgroundImage: imageLocation != null
+                    ? FileImage(File(imageLocation!))
                     : AssetImage('assets/images/avatar.jpg') as ImageProvider,
               ),
             ),
             SizedBox(height: 16),
             Text(
-              currentUser.name ?? 'Name not provided',
+              currentUser == null ? 'Name not provided' : currentUser!.fullname,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              currentUser.email ?? 'Email not provided',
+              currentUser == null ? 'Email not provided' : currentUser!.email,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 16),
             UserInfoTile(
                 icon: Icons.phone,
-                info: currentUser.phone ?? 'Phone not provided'),
+                info: currentUser == null
+                    ? 'Phone not provided'
+                    : currentUser!.phoneNumber),
             UserInfoTile(
                 icon: Icons.location_on,
-                info: currentUser.address ?? 'Address not provided'),
+                info: currentUser == null
+                    ? 'Address not provided'
+                    : currentUser!.address),
             UserInfoTile(
                 icon: Icons.location_city,
-                info: currentUser.city ?? 'no city provided'),
+                info: currentUser == null
+                    ? 'no city provided'
+                    : currentUser!.city),
             UserInfoTile(
                 icon: Icons.location_city,
-                info: currentUser.state ?? 'no state provided'),
+                info: currentUser == null
+                    ? 'no state provided'
+                    : currentUser!.state),
             SizedBox(height: 24),
             ElevatedButton.icon(
               icon: Icon(Icons.edit),
               label: Text('Update Profile'),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed('/register');
+              },
             ),
             SizedBox(height: 8),
             ElevatedButton.icon(

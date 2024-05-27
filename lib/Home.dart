@@ -175,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-      bottomNavigationBar: BottomNav(),
+      bottomNavigationBar: const BottomNav(),
       backgroundColor: Colors.white,
       body: Stack(
         children: [
@@ -203,15 +203,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       ]),
                 if (currentIndex == 2)
                   UserProfilePage(
-                      user: User(
-                          name: 'John Doe',
-                          email: 'jhondoe@gmail.com',
-                          phone: '1234567890',
-                          address: '1234, Street, City',
-                          state: 'State',
-                          country: 'Country',
-                          city: 'City',
-                          imageAsset: '')),
+                      // user: User(
+                      //     name: 'John Doe',
+                      //     email: 'jhondoe@gmail.com',
+                      //     phone: '1234567890',
+                      //     address: '1234, Street, City',
+                      //     state: 'State',
+                      //     country: 'Country',
+                      //     city: 'City',
+                      //     imageAsset: '')
+                  ),
               ],
             ),
           ),
@@ -228,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           if (currentIndex == 0 || currentIndex == 1)
             Positioned(
-                top: 30,
+                top: 100,
                 right: 0,
                 child: Container(
                     width: 100,
